@@ -32,12 +32,12 @@ defmodule PomodoroWeb.TimerLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col items-center justify-center min-h-[80vh]">
-      <div class="bg-white shadow-lg rounded-xl p-10 max-w-md w-full text-center">
+      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-10 max-w-md w-full text-center">
         <div class="mb-8">
-          <h2 class="text-xl font-semibold text-gray-700 mb-4">Ready to focus?</h2>
+          <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Ready to focus?</h2>
 
           <div class="timer-display mb-6">
-            <div class="text-7xl font-mono font-bold text-gray-800 tracking-widest">
+            <div class="text-7xl font-mono font-bold text-gray-800 dark:text-gray-200 tracking-widest">
               {format_time(@seconds_left)}
             </div>
           </div>
@@ -52,7 +52,7 @@ defmodule PomodoroWeb.TimerLive do
             </button>
             <button
               phx-click="toggle_break"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-8 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+              class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-3 px-8 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
               disabled={@timer_mode != :break && !(@seconds_left == 0 && @timer_mode == :focus)}
             >
               {if @timer_running && @timer_mode == :break, do: "Pause", else: "Break"}
@@ -60,7 +60,7 @@ defmodule PomodoroWeb.TimerLive do
           </div>
         </div>
 
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
           <p>Focus for 25 minutes, then take a short break.</p>
           <p>Stay productive with the Pomodoro Technique.</p>
         </div>
