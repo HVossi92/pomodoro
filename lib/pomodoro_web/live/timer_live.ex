@@ -1,19 +1,30 @@
 defmodule PomodoroWeb.TimerLive do
   use PomodoroWeb, :live_view
+  alias Pomodoro.TimerStore
 
   # 25 minutes in seconds
   @focus_time 25 * 60
   # 5 minutes in seconds
   @break_time 5 * 60
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    # Get user_id from session or generate a new one
+    user_id = PomodoroWeb.UserId.get_user_id(session)
+
+    if connected?(socket) do
+      # Subscribe to timer updates for this user
+      Phoenix.PubSub.subscribe(Pomodoro.PubSub, "timer:#{user_id}")
+    end
+
+    # Get initial timer state
+    timer = TimerStore.get_timer(user_id)
+
     socket =
-      assign(socket,
-        timer_running: false,
-        seconds_left: @focus_time,
-        timer_mode: :focus,
-        timer_ref: nil
-      )
+      socket
+      |> assign(:user_id, user_id)
+      |> assign(:timer_running, timer.running)
+      |> assign(:seconds_left, timer.seconds_left)
+      |> assign(:timer_mode, timer.mode)
 
     {:ok, socket}
   end
@@ -59,85 +70,40 @@ defmodule PomodoroWeb.TimerLive do
   end
 
   def handle_event("toggle_focus", _, socket) do
+    timer = TimerStore.toggle_focus(socket.assigns.user_id)
+
     socket =
-      case socket.assigns.timer_running do
-        true -> stop_timer(socket)
-        false -> start_timer(socket, :focus)
-      end
+      socket
+      |> assign(:timer_running, timer.running)
+      |> assign(:timer_mode, timer.mode)
 
     {:noreply, socket}
   end
 
   def handle_event("toggle_break", _, socket) do
+    timer = TimerStore.toggle_break(socket.assigns.user_id)
+
     socket =
-      case socket.assigns.timer_running do
-        true -> stop_timer(socket)
-        false -> start_timer(socket, :break)
-      end
+      socket
+      |> assign(:timer_running, timer.running)
+      |> assign(:timer_mode, timer.mode)
 
     {:noreply, socket}
   end
 
-  def handle_info(:tick, socket) do
-    new_seconds_left = socket.assigns.seconds_left - 1
-
+  def handle_info({:timer_update, timer}, socket) do
     socket =
-      if new_seconds_left <= 0 do
-        # Timer complete
-        send_notification(socket.assigns.timer_mode)
-        if socket.assigns.timer_ref, do: Process.cancel_timer(socket.assigns.timer_ref)
-
-        assign(socket,
-          seconds_left: 0,
-          timer_running: false,
-          timer_ref: nil
-        )
-      else
-        # Continue timer
-        timer_ref = Process.send_after(self(), :tick, 1000)
-
-        assign(socket,
-          seconds_left: new_seconds_left,
-          timer_ref: timer_ref
-        )
-      end
+      socket
+      |> assign(:timer_running, timer.running)
+      |> assign(:seconds_left, timer.seconds_left)
+      |> assign(:timer_mode, timer.mode)
 
     {:noreply, socket}
-  end
-
-  defp start_timer(socket, mode) do
-    seconds =
-      case mode do
-        :focus -> @focus_time
-        :break -> @break_time
-      end
-
-    seconds_left =
-      if mode == socket.assigns.timer_mode, do: socket.assigns.seconds_left, else: seconds
-
-    timer_ref = Process.send_after(self(), :tick, 1000)
-
-    assign(socket,
-      timer_running: true,
-      seconds_left: seconds_left,
-      timer_mode: mode,
-      timer_ref: timer_ref
-    )
-  end
-
-  defp stop_timer(socket) do
-    if socket.assigns.timer_ref, do: Process.cancel_timer(socket.assigns.timer_ref)
-    assign(socket, timer_running: false, timer_ref: nil)
   end
 
   defp format_time(seconds) do
     minutes = div(seconds, 60)
     seconds = rem(seconds, 60)
     "#{String.pad_leading("#{minutes}", 2, "0")}:#{String.pad_leading("#{seconds}", 2, "0")}"
-  end
-
-  defp send_notification(mode) do
-    # This function could be expanded to play a sound, show a browser notification, etc.
-    IO.puts("#{mode} time completed!")
   end
 end

@@ -11,8 +11,7 @@ defmodule Pomodoro.Application do
       PomodoroWeb.Telemetry,
       Pomodoro.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:pomodoro, :ecto_repos),
-        skip: skip_migrations?()},
+       repos: Application.fetch_env!(:pomodoro, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:pomodoro, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Pomodoro.PubSub},
       # Start the Finch HTTP client for sending emails
@@ -20,7 +19,8 @@ defmodule Pomodoro.Application do
       # Start a worker by calling: Pomodoro.Worker.start_link(arg)
       # {Pomodoro.Worker, arg},
       # Start to serve requests, typically the last entry
-      PomodoroWeb.Endpoint
+      PomodoroWeb.Endpoint,
+      Pomodoro.TimerStore
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

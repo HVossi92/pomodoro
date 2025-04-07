@@ -8,6 +8,7 @@ defmodule PomodoroWeb.Router do
     plug :put_root_layout, html: {PomodoroWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :assign_user_id
   end
 
   pipeline :api do
@@ -41,5 +42,10 @@ defmodule PomodoroWeb.Router do
       live_dashboard "/dashboard", metrics: PomodoroWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  defp assign_user_id(conn, _opts) do
+    user_id = PomodoroWeb.UserId.get_user_id(conn)
+    PomodoroWeb.UserId.put_user_id(conn, user_id)
   end
 end
