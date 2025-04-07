@@ -5,7 +5,7 @@
 - [x] Create a new Phoenix project with LiveView support
 - [x] Configure Tailwind CSS
 - [x] Set up basic project structure
-- [ ] Create the main layout
+- [x] Create the main layout
 
 ## 2. Design Data Model
 
