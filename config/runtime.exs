@@ -59,7 +59,12 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: secret_key_base,
+    check_origin: [
+      "//128.140.35.224:4000",
+      "//letsfocus.duckdns.org",
+      "//*.letsfocus.duckdns.org"
+    ]
 
   # ## SSL Support
   #
