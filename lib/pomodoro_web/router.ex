@@ -20,6 +20,7 @@ defmodule PomodoroWeb.Router do
 
     live "/", TimerLive
     # get "/", PageController, :home
+    get "/privacy", PageController, :privacy
   end
 
   # Other scopes may use custom stacks.

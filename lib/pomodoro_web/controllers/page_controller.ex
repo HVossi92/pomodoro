@@ -6,4 +6,8 @@ defmodule PomodoroWeb.PageController do
     # so skip the default app layout.
     render(conn, :home, layout: false)
   end
+
+  def privacy(conn, _params) do
+    render(conn, :privacy)
+  end
 end

@@ -125,16 +125,20 @@ mix test
 
 ### 7. Advanced Features (for future iterations)
 
-- [x] Session tracking for completed Pomodoros
 - [ ] Statistics and reports
 
 ### 8. Testing
 
 - [ ] Write unit tests for the timer logic
 - [ ] Create component tests for the LiveView
-- [ ] Perform end-to-end testing
+- [ ] Perform end-to-end testingPomodoro Timer Web App - Step by Step Plan
 
 ### 9. Deployment
 
 - [ ] Prepare the application for production
 - [ ] Deploy to a hosting service
+
+### 10. MISC
+
+- [x] Add data privacy page
+- [] Check functionality in incognito mode
