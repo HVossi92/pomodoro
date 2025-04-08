@@ -10,7 +10,9 @@ config :pomodoro, PomodoroWeb.Endpoint,
   check_origin: [
     "//128.140.35.224:4000",
     "//letsfocus.duckdns.org",
-    "//*.letsfocus.duckdns.org"
+    "//*.letsfocus.duckdns.org",
+    "//pomodorofocus.duckdns.org",
+    "//*.pomodorofocus.duckdns.org"
   ]
 
 # Configures Swoosh API Client
