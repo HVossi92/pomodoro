@@ -37,7 +37,8 @@ defmodule Pomodoro.TimerStore do
   @impl true
   def handle_call({:toggle_focus, user_id, focus_time}, _from, timers) do
     timer = get_or_create_timer(timers, user_id)
-    new_timer = %{timer | running: !timer.running, mode: :focus, seconds_left: focus_time}
+    running = if timer.mode == :focus and timer.running, do: false, else: true
+    new_timer = %{timer | running: running, mode: :focus, seconds_left: focus_time}
 
     Phoenix.PubSub.broadcast(Pomodoro.PubSub, "timer:#{user_id}", {:timer_update, new_timer})
     {:reply, new_timer, Map.put(timers, user_id, new_timer)}
@@ -46,7 +47,8 @@ defmodule Pomodoro.TimerStore do
   @impl true
   def handle_call({:toggle_break, user_id, break_time}, _from, timers) do
     timer = get_or_create_timer(timers, user_id)
-    new_timer = %{timer | running: !timer.running, mode: :break, seconds_left: break_time}
+    running = if timer.mode == :break and timer.running, do: false, else: true
+    new_timer = %{timer | running: running, mode: :break, seconds_left: break_time}
 
     Phoenix.PubSub.broadcast(Pomodoro.PubSub, "timer:#{user_id}", {:timer_update, new_timer})
     {:reply, new_timer, Map.put(timers, user_id, new_timer)}

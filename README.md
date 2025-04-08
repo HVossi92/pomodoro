@@ -96,9 +96,8 @@ mix test
 - [x] Implement functions to:
   - [x] Start the timer
   - [x] Pause the timer
-  - [ ] Reset the timer
-  - [ ] Handle timer completion
-  - [ ] Switch between Focus and Break modes
+  - [x] Reset the timer
+  - [x] Switch between Focus and Break modes
 
 ### 4. Implement LiveView Component
 
@@ -120,8 +119,7 @@ mix test
 
 - [x] Connect UI buttons to LiveView events
 - [x] Implement real-time updates of the timer display
-- [ ] Add visual and audio indicators for timer completion
-- [ ] Implement smooth transitions between states
+- [ ] Add visual indicators for timer completion
 
 ### 7. Advanced Features (for future iterations)
 
@@ -131,7 +129,7 @@ mix test
 
 - [ ] Write unit tests for the timer logic
 - [ ] Create component tests for the LiveView
-- [ ] Perform end-to-end testingPomodoro Timer Web App - Step by Step Plan
+- [ ] Perform end-to-end testing
 
 ### 9. Deployment
 

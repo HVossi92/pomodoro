@@ -46,16 +46,14 @@ defmodule PomodoroWeb.TimerLive do
             <button
               phx-click="toggle_focus"
               class="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-8 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              disabled={@timer_mode != :focus}
             >
-              {if @timer_running && @timer_mode == :focus, do: "Pause", else: "Focus"}
+              {if @timer_running && @timer_mode == :focus, do: "Reset", else: "Focus"}
             </button>
             <button
               phx-click="toggle_break"
               class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-3 px-8 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
-              disabled={@timer_mode != :break && !(@seconds_left == 0 && @timer_mode == :focus)}
             >
-              {if @timer_running && @timer_mode == :break, do: "Pause", else: "Break"}
+              {if @timer_running && @timer_mode == :break, do: "Reset", else: "Break"}
             </button>
           </div>
         </div>
@@ -76,6 +74,7 @@ defmodule PomodoroWeb.TimerLive do
       socket
       |> assign(:timer_running, timer.running)
       |> assign(:timer_mode, timer.mode)
+      |> assign(:seconds_left, timer.seconds_left)
 
     {:noreply, socket}
   end
@@ -87,6 +86,7 @@ defmodule PomodoroWeb.TimerLive do
       socket
       |> assign(:timer_running, timer.running)
       |> assign(:timer_mode, timer.mode)
+      |> assign(:seconds_left, timer.seconds_left)
 
     {:noreply, socket}
   end
