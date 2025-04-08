@@ -1,7 +1,11 @@
+IMAGE_NAME = hvossi92/pomodoro
+TIMESTAMP := $(shell date +%Y%m%d%H%M%S)
+
 build:
-	# Only works on a linux machine, no clue how to get it to work on macos
 	docker build --platform linux/amd64 -t pomodoro .
 
 push:
-	docker tag pomodoro hvossi92/pomodoro:latest
-	docker push hvossi92/pomodoro:latest
+	docker tag pomodoro $(IMAGE_NAME):$(TIMESTAMP)
+	docker push $(IMAGE_NAME):$(TIMESTAMP)
+	docker tag $(IMAGE_NAME):$(TIMESTAMP) $(IMAGE_NAME):latest
+	docker push $(IMAGE_NAME):latest
