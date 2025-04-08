@@ -70,7 +70,7 @@ defmodule PomodoroWeb.TimerLive do
   end
 
   def handle_event("toggle_focus", _, socket) do
-    timer = TimerStore.toggle_focus(socket.assigns.user_id)
+    timer = TimerStore.toggle_focus(socket.assigns.user_id, @focus_time)
 
     socket =
       socket
@@ -81,7 +81,7 @@ defmodule PomodoroWeb.TimerLive do
   end
 
   def handle_event("toggle_break", _, socket) do
-    timer = TimerStore.toggle_break(socket.assigns.user_id)
+    timer = TimerStore.toggle_break(socket.assigns.user_id, @break_time)
 
     socket =
       socket

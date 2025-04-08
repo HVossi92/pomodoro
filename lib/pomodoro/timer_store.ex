@@ -11,12 +11,12 @@ defmodule Pomodoro.TimerStore do
     GenServer.call(__MODULE__, {:get_timer, user_id})
   end
 
-  def toggle_focus(user_id) do
-    GenServer.call(__MODULE__, {:toggle_focus, user_id})
+  def toggle_focus(user_id, focus_time \\ 25 * 60) do
+    GenServer.call(__MODULE__, {:toggle_focus, user_id, focus_time})
   end
 
-  def toggle_break(user_id) do
-    GenServer.call(__MODULE__, {:toggle_break, user_id})
+  def toggle_break(user_id, break_time \\ 5 * 60) do
+    GenServer.call(__MODULE__, {:toggle_break, user_id, break_time})
   end
 
   # Server callbacks
@@ -35,18 +35,18 @@ defmodule Pomodoro.TimerStore do
   end
 
   @impl true
-  def handle_call({:toggle_focus, user_id}, _from, timers) do
+  def handle_call({:toggle_focus, user_id, focus_time}, _from, timers) do
     timer = get_or_create_timer(timers, user_id)
-    new_timer = %{timer | running: !timer.running, mode: :focus}
+    new_timer = %{timer | running: !timer.running, mode: :focus, seconds_left: focus_time}
 
     Phoenix.PubSub.broadcast(Pomodoro.PubSub, "timer:#{user_id}", {:timer_update, new_timer})
     {:reply, new_timer, Map.put(timers, user_id, new_timer)}
   end
 
   @impl true
-  def handle_call({:toggle_break, user_id}, _from, timers) do
+  def handle_call({:toggle_break, user_id, break_time}, _from, timers) do
     timer = get_or_create_timer(timers, user_id)
-    new_timer = %{timer | running: !timer.running, mode: :break}
+    new_timer = %{timer | running: !timer.running, mode: :break, seconds_left: break_time}
 
     Phoenix.PubSub.broadcast(Pomodoro.PubSub, "timer:#{user_id}", {:timer_update, new_timer})
     {:reply, new_timer, Map.put(timers, user_id, new_timer)}

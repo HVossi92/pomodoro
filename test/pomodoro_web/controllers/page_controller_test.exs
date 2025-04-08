@@ -3,6 +3,7 @@ defmodule PomodoroWeb.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+    assert html_response(conn, 200) =~ "Ready to focus?"
+    assert html_response(conn, 200) =~ "Focus for 25 minutes, then take a short break."
   end
 end
