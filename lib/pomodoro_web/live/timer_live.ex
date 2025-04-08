@@ -25,6 +25,7 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_running, timer.running)
       |> assign(:seconds_left, timer.seconds_left)
       |> assign(:timer_mode, timer.mode)
+      |> assign(:page_title, "Let's Focus - #{format_time(timer.seconds_left)}")
 
     {:ok, socket}
   end
@@ -75,6 +76,7 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_running, timer.running)
       |> assign(:timer_mode, timer.mode)
       |> assign(:seconds_left, timer.seconds_left)
+      |> assign(:page_title, "Let's Focus - #{format_time(timer.seconds_left)}")
 
     {:noreply, socket}
   end
@@ -87,6 +89,7 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_running, timer.running)
       |> assign(:timer_mode, timer.mode)
       |> assign(:seconds_left, timer.seconds_left)
+      |> assign(:page_title, "Let's Focus - #{format_time(timer.seconds_left)}")
 
     {:noreply, socket}
   end
@@ -97,6 +100,7 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_running, timer.running)
       |> assign(:seconds_left, timer.seconds_left)
       |> assign(:timer_mode, timer.mode)
+      |> assign(:page_title, "Let's Focus - #{format_time(timer.seconds_left)}")
 
     {:noreply, socket}
   end

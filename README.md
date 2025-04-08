@@ -119,7 +119,7 @@ mix test
 
 - [x] Connect UI buttons to LiveView events
 - [x] Implement real-time updates of the timer display
-- [ ] Add visual indicators for timer completion
+- [x] Add visual indicators for timer completion
 
 ### 7. Advanced Features (for future iterations)
 
