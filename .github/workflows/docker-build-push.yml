@@ -25,6 +25,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Verify Docker Login
+        run: docker info
+
       - name: Generate timestamp
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
@@ -36,5 +39,5 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            hvossi92/pomodoro:${{ env.timestamp }}
-            hvossi92/pomodoro:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/pomodoro:${{ env.timestamp }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/pomodoro:latest
