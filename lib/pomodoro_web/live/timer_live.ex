@@ -7,6 +7,7 @@ defmodule PomodoroWeb.TimerLive do
   # 5 minutes in seconds
   @break_time 5 * 60
 
+  @impl true
   def mount(_params, session, socket) do
     # Get user_id from session or generate a new one
     user_id = PomodoroWeb.UserId.get_user_id(session)
@@ -30,6 +31,21 @@ defmodule PomodoroWeb.TimerLive do
     {:ok, socket}
   end
 
+  @impl true
+  def terminate(_reason, socket) do
+    # Cleanup when LiveView process terminates
+    if socket.assigns[:user_id] do
+      # Unsubscribe from PubSub
+      Phoenix.PubSub.unsubscribe(Pomodoro.PubSub, "timer:#{socket.assigns.user_id}")
+
+      # Clean up timer resources
+      TimerStore.cleanup_user_timer(socket.assigns.user_id)
+    end
+
+    :ok
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex flex-col items-center justify-center min-h-[80vh]">
@@ -68,6 +84,7 @@ defmodule PomodoroWeb.TimerLive do
     """
   end
 
+  @impl true
   def handle_event("toggle_focus", _, socket) do
     timer = TimerStore.toggle_focus(socket.assigns.user_id, @focus_time)
 
@@ -81,6 +98,7 @@ defmodule PomodoroWeb.TimerLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("toggle_break", _, socket) do
     timer = TimerStore.toggle_break(socket.assigns.user_id, @break_time)
 
@@ -94,6 +112,7 @@ defmodule PomodoroWeb.TimerLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_info({:timer_update, timer}, socket) do
     socket =
       socket

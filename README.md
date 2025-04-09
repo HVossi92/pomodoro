@@ -121,40 +121,25 @@ mix test
 - [x] Implement real-time updates of the timer display
 - [x] Add visual indicators for timer completion
 
-### 7. Advanced Features (for future iterations)
-
-- [ ] Add monitoring and diagnostics
-  - [ ] Implement basic telemetry metrics for timer usage
-  - [ ] Add system monitoring to track memory usage over time
-
-### 8. Testing
-
-- [ ] Write unit tests for the timer logic
-- [ ] Create component tests for the LiveView
-- [ ] Perform end-to-end testing
-- [ ] Complete testing tasks from section 8
-  - [ ] Add specific tests for timer resource cleanup
-  - [ ] Create stress tests to verify memory usage under load
-
-### 9. Deployment
+### 7. Deployment
 
 - [x] Prepare the application for production
 - [x] Deploy to a hosting service
 
-### 10. MISC
+### 8. MISC
 
 - [x] Add data privacy page
 - [x] Check functionality in incognito mode
 
-### 11. Performance & Resource Management
+### 9. Performance & Resource Management
 
-- [ ] Implement timer cleanup mechanism
-  - [ ] Add LiveView `on_mount` or `terminate` callback to clean up resources when a session ends
-  - [ ] Properly unsubscribe from PubSub when a LiveView process terminates
-  - [ ] Add timer reference tracking and cancellation in TimerStore
-- [ ] Add idle session management
-  - [ ] Implement timeout for inactive user sessions to free up server resources
-  - [ ] Add configuration options for session timeout duration
-- [ ] Optimize memory usage in GenServer state
-  - [ ] Implement periodic cleanup of stale timer data
-  - [ ] Add automatic cleanup for completed timers (at zero)
+- [x] Implement timer cleanup mechanism
+  - [x] Add LiveView `on_mount` or `terminate` callback to clean up resources when a session ends
+  - [x] Properly unsubscribe from PubSub when a LiveView process terminates
+  - [x] Add timer reference tracking and cancellation in TimerStore
+- [x] Add idle session management
+  - [x] Implement timeout for inactive user sessions to free up server resources
+  - [x] Add configuration options for session timeout duration
+- [x] Optimize memory usage in GenServer state
+  - [x] Implement periodic cleanup of stale timer data
+  - [x] Add automatic cleanup for completed timers (at zero)

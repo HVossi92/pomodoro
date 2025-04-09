@@ -20,7 +20,8 @@ defmodule Pomodoro.Application do
       # {Pomodoro.Worker, arg},
       # Start to serve requests, typically the last entry
       PomodoroWeb.Endpoint,
-      Pomodoro.TimerStore
+      # Start the TimerStore with configurable session timeout (default is 30 minutes)
+      {Pomodoro.TimerStore, [session_timeout: timer_session_timeout()]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -40,5 +41,10 @@ defmodule Pomodoro.Application do
   defp skip_migrations?() do
     # By default, sqlite migrations are run when using a release
     System.get_env("RELEASE_NAME") != nil
+  end
+
+  # Get the timer session timeout from config or use default (30 minutes)
+  defp timer_session_timeout do
+    Application.get_env(:pomodoro, :timer_session_timeout, 30 * 60 * 1000)
   end
 end
