@@ -62,10 +62,8 @@ if config_env() == :prod do
     secret_key_base: secret_key_base,
     check_origin: [
       "//128.140.35.224:4000",
-      "//letsfocus.duckdns.org",
-      "//*.letsfocus.duckdns.org",
-      "//pomodorofocus.duckdns.org",
-      "//*.pomodorofocus.duckdns.org"
+      "//pomofocus.duckdns.org",
+      "//*.pomofocus.duckdns.org"
     ]
 
   # ## SSL Support
