@@ -123,20 +123,38 @@ mix test
 
 ### 7. Advanced Features (for future iterations)
 
-- [ ] Statistics and reports
+- [ ] Add monitoring and diagnostics
+  - [ ] Implement basic telemetry metrics for timer usage
+  - [ ] Add system monitoring to track memory usage over time
 
 ### 8. Testing
 
 - [ ] Write unit tests for the timer logic
 - [ ] Create component tests for the LiveView
 - [ ] Perform end-to-end testing
+- [ ] Complete testing tasks from section 8
+  - [ ] Add specific tests for timer resource cleanup
+  - [ ] Create stress tests to verify memory usage under load
 
 ### 9. Deployment
 
-- [ ] Prepare the application for production
-- [ ] Deploy to a hosting service
+- [x] Prepare the application for production
+- [x] Deploy to a hosting service
 
 ### 10. MISC
 
 - [x] Add data privacy page
-- [] Check functionality in incognito mode
+- [x] Check functionality in incognito mode
+
+### 11. Performance & Resource Management
+
+- [ ] Implement timer cleanup mechanism
+  - [ ] Add LiveView `on_mount` or `terminate` callback to clean up resources when a session ends
+  - [ ] Properly unsubscribe from PubSub when a LiveView process terminates
+  - [ ] Add timer reference tracking and cancellation in TimerStore
+- [ ] Add idle session management
+  - [ ] Implement timeout for inactive user sessions to free up server resources
+  - [ ] Add configuration options for session timeout duration
+- [ ] Optimize memory usage in GenServer state
+  - [ ] Implement periodic cleanup of stale timer data
+  - [ ] Add automatic cleanup for completed timers (at zero)

@@ -89,6 +89,12 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/pomodoro ./
 
 USER nobody
 
+# Set Erlang VM memory limits
+# ENV ERLANG_VM_OPTIONS="-smp disable +K true +P 250000 +hms 512 +hmbs 1024"
+
+# Limit maximum number of ports to prevent excessive memory usage
+ENV ERL_MAX_PORTS=1024
+
 # If using an environment that doesn't automatically reap zombie processes, it is
 # advised to add an init process such as tini via `apt-get install`
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
