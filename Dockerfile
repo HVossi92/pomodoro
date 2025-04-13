@@ -81,6 +81,9 @@ ENV LC_ALL en_US.UTF-8
 WORKDIR "/app"
 RUN chown nobody /app
 
+# Create data directory for SQLite database and set permissions
+RUN mkdir -p /app/data && chown -R nobody:root /app/data
+
 # set runner ENV
 ENV MIX_ENV="prod"
 
