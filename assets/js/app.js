@@ -61,10 +61,46 @@ const setupDarkMode = () => {
 // Initialize dark mode
 setupDarkMode();
 
+// Define the storage key globally
+window.POMODORO_USER_ID_KEY = "pomodoro_user_id";
+
+// Define Hooks for LiveView
+const Hooks = {}
+
+// Hook to handle user ID persistence across tabs and refreshes
+Hooks.UserIdHook = {
+  mounted() {
+    // Handle server sending a user ID to store
+    this.handleEvent("init-user-id", ({ user_id, local_storage_key }) => {
+      // Store the key globally
+      window.POMODORO_USER_ID_KEY = local_storage_key;
+      // Check if we already have a user ID in localStorage
+      const storedUserId = localStorage.getItem(local_storage_key);
+
+      if (storedUserId && storedUserId !== user_id) {
+        // If the stored ID is different from the one provided by the server,
+        // push the stored one to the server
+        this.pushEvent("user_id_from_storage", { user_id: storedUserId });
+      } else if (!storedUserId) {
+        // If no ID in localStorage, store the one from the server
+        localStorage.setItem(local_storage_key, user_id);
+      }
+    });
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: { _csrf_token: csrfToken }
+  params: { _csrf_token: csrfToken },
+  hooks: Hooks,
+  // Add these configs for better reconnection handling
+  reconnectAfterMs: (tries) => {
+    // Try to reconnect quickly first, then with increasing backoff
+    return [100, 250, 500, 1000, 2000, 5000][tries - 1] || 10000;
+  },
+  // Keep the websocket connection alive with periodic heartbeats
+  heartbeatIntervalMs: 30000
 })
 
 // Show progress bar on live navigation and form submits
@@ -80,4 +116,22 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+// Add a custom handler for when websocket reconnects
+window.addEventListener("phx:connect", () => {
+  // Check if there's a stored ID to help resync after disconnections
+  const storedUserId = localStorage.getItem(window.POMODORO_USER_ID_KEY);
+  if (storedUserId) {
+    // This will sync state after reconnection if needed
+    setTimeout(() => {
+      const container = document.getElementById("user-id-container");
+      if (container && container.phxHookId) {
+        const hook = liveSocket.getHookById(container.phxHookId);
+        if (hook) {
+          hook.pushEvent("user_id_from_storage", { user_id: storedUserId });
+        }
+      }
+    }, 500); // Small delay to ensure hook is initialized
+  }
+});
 

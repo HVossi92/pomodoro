@@ -51,11 +51,50 @@ defmodule Pomodoro.TimerStore do
   @impl true
   def handle_call({:get_timer, user_id}, _from, state) do
     timer = get_or_create_timer(state.timers, user_id)
+
+    # If the timer was running last time, calculate the current state
+    updated_timer =
+      if timer.running do
+        # Get elapsed time since last activity
+        last_active = Map.get(state.last_activity, user_id)
+
+        if last_active do
+          current_time = System.monotonic_time(:millisecond)
+          elapsed_seconds = div(current_time - last_active, 1000)
+
+          # Only update if there was a significant time gap (more than 1 second)
+          if elapsed_seconds > 1 do
+            # Calculate new seconds left, ensuring it doesn't go below 0
+            new_seconds = max(timer.seconds_left - elapsed_seconds, 0)
+            %{timer | seconds_left: new_seconds}
+          else
+            timer
+          end
+        else
+          timer
+        end
+      else
+        timer
+      end
+
     # Update last activity timestamp
     updated_activity = Map.put(state.last_activity, user_id, System.monotonic_time(:millisecond))
 
-    {:reply, timer,
-     %{state | timers: Map.put(state.timers, user_id, timer), last_activity: updated_activity}}
+    # Broadcast the updated timer state
+    if timer != updated_timer do
+      Phoenix.PubSub.broadcast(
+        Pomodoro.PubSub,
+        "timer:#{user_id}",
+        {:timer_update, updated_timer}
+      )
+    end
+
+    {:reply, updated_timer,
+     %{
+       state
+       | timers: Map.put(state.timers, user_id, updated_timer),
+         last_activity: updated_activity
+     }}
   end
 
   @impl true
@@ -106,8 +145,9 @@ defmodule Pomodoro.TimerStore do
     updated_timers =
       Enum.reduce(state.timers, %{}, fn {user_id, timer}, acc ->
         updated_timer =
-          if timer.running && timer.seconds_left > 0 do
-            new_seconds = timer.seconds_left - 1
+          if timer.running do
+            # Only decrement if seconds are greater than 0
+            new_seconds = if timer.seconds_left > 0, do: timer.seconds_left - 1, else: 0
             new_timer = %{timer | seconds_left: new_seconds}
 
             # Broadcast update
@@ -125,12 +165,9 @@ defmodule Pomodoro.TimerStore do
         Map.put(acc, user_id, updated_timer)
       end)
 
-    # Clean up completed timers (at zero and not running)
-    cleaned_timers = clean_completed_timers(updated_timers)
-
     # Schedule next tick
     new_ref = Process.send_after(self(), :tick, 1000)
-    {:noreply, %{state | timers: cleaned_timers, tick_ref: new_ref}}
+    {:noreply, %{state | timers: updated_timers, tick_ref: new_ref}}
   end
 
   @impl true
@@ -174,14 +211,5 @@ defmodule Pomodoro.TimerStore do
       seconds_left: 25 * 60,
       mode: :focus
     })
-  end
-
-  # Helper function to clean up completed timers
-  defp clean_completed_timers(timers) do
-    Enum.filter(timers, fn {_user_id, timer} ->
-      # Keep timers that are either running or not at zero
-      timer.running || timer.seconds_left > 0
-    end)
-    |> Map.new()
   end
 end
