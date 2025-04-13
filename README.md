@@ -2,10 +2,6 @@
 
 A web-based Pomodoro Timer application built with Elixir, Phoenix, and LiveView. This application helps you implement the Pomodoro Technique - a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.
 
-## Todos:
-
-- [] When switching to a different tab, the title doesn't update
-
 ## Live Demo
 
 Try out the Pomodoro Timer in action: [**Live Demo**](https://pomofocus.duckdns.org)

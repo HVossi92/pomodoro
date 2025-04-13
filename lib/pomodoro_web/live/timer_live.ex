@@ -71,7 +71,13 @@ defmodule PomodoroWeb.TimerLive do
       phx-hook="UserIdHook"
       id="user-id-container"
     >
-      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-10 max-w-md w-full text-center">
+      <div
+        class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-10 max-w-md w-full text-center"
+        phx-hook="TimerTitleHook"
+        id="timer-display"
+        data-seconds-left={@seconds_left}
+        data-running={@timer_running}
+      >
         <div class="mb-8">
           <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Ready to focus?</h2>
 
@@ -116,6 +122,10 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_mode, timer.mode)
       |> assign(:seconds_left, timer.seconds_left)
       |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
+      |> push_event("timer-update", %{
+        running: timer.running,
+        seconds_left: timer.seconds_left
+      })
 
     {:noreply, socket}
   end
@@ -130,6 +140,10 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:timer_mode, timer.mode)
       |> assign(:seconds_left, timer.seconds_left)
       |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
+      |> push_event("timer-update", %{
+        running: timer.running,
+        seconds_left: timer.seconds_left
+      })
 
     {:noreply, socket}
   end
@@ -183,6 +197,10 @@ defmodule PomodoroWeb.TimerLive do
       |> assign(:seconds_left, timer.seconds_left)
       |> assign(:timer_mode, timer.mode)
       |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
+      |> push_event("timer-update", %{
+        running: timer.running,
+        seconds_left: timer.seconds_left
+      })
 
     {:noreply, socket}
   end

@@ -89,6 +89,84 @@ Hooks.UserIdHook = {
   }
 }
 
+// Hook to handle timer title updates in background tabs
+Hooks.TimerTitleHook = {
+  mounted() {
+    this.timerRef = null;
+    this.lastSecondsLeft = parseInt(this.el.dataset.secondsLeft);
+    this.isRunning = this.el.dataset.running === "true";
+    this.prefix = "Pomo Focus - ";
+
+    // Initialize timer if it's running
+    this.updateTimerTitle(this.isRunning, this.lastSecondsLeft);
+
+    // Listen for timer updates
+    this.handleEvent("timer-update", ({ running, seconds_left }) => {
+      this.isRunning = running;
+      this.lastSecondsLeft = seconds_left;
+      this.updateTimerTitle(running, seconds_left);
+    });
+  },
+
+  updateTimerTitle(running, secondsLeft) {
+    // Clear any existing timer
+    if (this.timerRef) {
+      clearInterval(this.timerRef);
+      this.timerRef = null;
+    }
+
+    // If timer is running, create a JavaScript timer to update the title
+    if (running) {
+      let currentSeconds = secondsLeft;
+
+      // Immediately update title
+      document.title = this.prefix + this.formatTime(currentSeconds);
+
+      // Set up interval to keep updating title even when tab is inactive
+      this.timerRef = setInterval(() => {
+        if (currentSeconds > 0) {
+          currentSeconds--;
+          document.title = this.prefix + this.formatTime(currentSeconds);
+        } else {
+          // Stop the timer when it reaches zero
+          clearInterval(this.timerRef);
+          this.timerRef = null;
+        }
+      }, 1000);
+    } else {
+      // Just set the title once if not running
+      document.title = this.prefix + this.formatTime(secondsLeft);
+    }
+  },
+
+  formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  },
+
+  updated() {
+    // When the component updates, get new values
+    const newSecondsLeft = parseInt(this.el.dataset.secondsLeft);
+    const newIsRunning = this.el.dataset.running === "true";
+
+    // Only update if something changed
+    if (newSecondsLeft !== this.lastSecondsLeft || newIsRunning !== this.isRunning) {
+      this.lastSecondsLeft = newSecondsLeft;
+      this.isRunning = newIsRunning;
+      this.updateTimerTitle(newIsRunning, newSecondsLeft);
+    }
+  },
+
+  destroyed() {
+    // Clean up timer when component is removed
+    if (this.timerRef) {
+      clearInterval(this.timerRef);
+      this.timerRef = null;
+    }
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
