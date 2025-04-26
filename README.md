@@ -5,9 +5,11 @@ This implementation will keep running, event after you close the tab, without an
 
 ## Live Demo
 
-Try out the Pomodoro Timer in action: [**Live Demo**](https://pomofocus.duckdns.org)
+Try out the Pomodoro Timer in action: [**Live Demo**](https://pomofocus.uk/)
 
-[![Pomodoro Timer Screenshot](/priv/static/images/pomodoro_screenshot.png)](https://pomofocus.duckdns.org)
+[![Pomodoro Timer Screenshot](/priv/static/images/pomodoro_screenshot.png)](https://pomofocus.uk/)
+
+Backup link: https://pomofocus.duckdns.org
 
 ## About the Pomodoro Technique
 
