@@ -63,7 +63,9 @@ if config_env() == :prod do
     check_origin: [
       "//128.140.35.224:4000",
       "//pomofocus.duckdns.org",
-      "//*.pomofocus.duckdns.org"
+      "//*.pomofocus.duckdns.org",
+      "//pomofocus.uk",
+      "//*.pomofocus.uk"
     ]
 
   # ## SSL Support
