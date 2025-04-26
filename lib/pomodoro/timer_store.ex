@@ -62,14 +62,9 @@ defmodule Pomodoro.TimerStore do
           current_time = System.monotonic_time(:millisecond)
           elapsed_seconds = div(current_time - last_active, 1000)
 
-          # Only update if there was a significant time gap (more than 1 second)
-          if elapsed_seconds > 1 do
-            # Calculate new seconds left, ensuring it doesn't go below 0
-            new_seconds = max(timer.seconds_left - elapsed_seconds, 0)
-            %{timer | seconds_left: new_seconds}
-          else
-            timer
-          end
+          # Calculate new seconds left, ensuring it doesn't go below 0
+          new_seconds = max(timer.seconds_left - elapsed_seconds, 0)
+          %{timer | seconds_left: new_seconds}
         else
           timer
         end
@@ -155,9 +150,11 @@ defmodule Pomodoro.TimerStore do
     # Cancel old timer reference if it exists
     if old_ref, do: Process.cancel_timer(old_ref)
 
+    current_time = System.monotonic_time(:millisecond)
     # Update all running timers
-    updated_timers =
-      Enum.reduce(state.timers, %{}, fn {user_id, timer}, acc ->
+    {updated_timers, updated_activity} =
+      Enum.reduce(state.timers, {%{}, state.last_activity}, fn {user_id, timer},
+                                                               {timers_acc, activity_acc} ->
         updated_timer =
           if timer.running do
             # Only decrement if seconds are greater than 0
@@ -181,12 +178,22 @@ defmodule Pomodoro.TimerStore do
             timer
           end
 
-        Map.put(acc, user_id, updated_timer)
+        # Update last_activity for running timers to keep them in sync
+        new_activity_acc =
+          if timer.running do
+            Map.put(activity_acc, user_id, current_time)
+          else
+            activity_acc
+          end
+
+        {Map.put(timers_acc, user_id, updated_timer), new_activity_acc}
       end)
 
     # Schedule next tick
     new_ref = Process.send_after(self(), :tick, 1000)
-    {:noreply, %{state | timers: updated_timers, tick_ref: new_ref}}
+
+    {:noreply,
+     %{state | timers: updated_timers, last_activity: updated_activity, tick_ref: new_ref}}
   end
 
   @impl true
