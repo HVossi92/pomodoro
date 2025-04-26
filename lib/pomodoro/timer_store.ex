@@ -103,6 +103,13 @@ defmodule Pomodoro.TimerStore do
     running = if timer.mode == :focus and timer.running, do: false, else: true
     new_timer = %{timer | running: running, mode: :focus, seconds_left: focus_time}
 
+    # Log the analytics data when a user starts or stops a focus timer
+    if running do
+      log_action_safely(user_id, "start", :focus, focus_time)
+    else
+      log_action_safely(user_id, "stop", :focus, timer.seconds_left)
+    end
+
     # Update last activity timestamp
     updated_activity = Map.put(state.last_activity, user_id, System.monotonic_time(:millisecond))
 
@@ -117,6 +124,13 @@ defmodule Pomodoro.TimerStore do
     timer = get_or_create_timer(state.timers, user_id)
     running = if timer.mode == :break and timer.running, do: false, else: true
     new_timer = %{timer | running: running, mode: :break, seconds_left: break_time}
+
+    # Log the analytics data when a user starts or stops a break timer
+    if running do
+      log_action_safely(user_id, "start", :break, break_time)
+    else
+      log_action_safely(user_id, "stop", :break, timer.seconds_left)
+    end
 
     # Update last activity timestamp
     updated_activity = Map.put(state.last_activity, user_id, System.monotonic_time(:millisecond))
@@ -156,6 +170,11 @@ defmodule Pomodoro.TimerStore do
               "timer:#{user_id}",
               {:timer_update, new_timer}
             )
+
+            # Log completion of timer if it just reached zero
+            if new_seconds == 0 and timer.seconds_left > 0 do
+              log_action_safely(user_id, "complete", timer.mode, 0)
+            end
 
             new_timer
           else
@@ -211,5 +230,23 @@ defmodule Pomodoro.TimerStore do
       seconds_left: 25 * 60,
       mode: :focus
     })
+  end
+
+  # Helper function to safely log analytics without crashing if the module is not available
+  defp log_action_safely(user_id, action, mode, duration) do
+    try do
+      # Use dynamic code loading to avoid compile-time dependency
+      analytics_module =
+        :pomodoro |> Application.spec(:modules) |> Enum.find(&(&1 == Pomodoro.Analytics))
+
+      if analytics_module do
+        apply(Pomodoro.Analytics, :log_action, [user_id, action, mode, duration])
+      end
+    rescue
+      # Silently handle any errors
+      _ -> :ok
+    end
+
+    :ok
   end
 end
