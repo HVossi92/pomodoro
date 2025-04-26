@@ -103,4 +103,5 @@ ENV ERL_MAX_PORTS=1024
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
-CMD ["/app/bin/server"]
+# Run migrations then start the server
+CMD ["sh", "-c", "/app/bin/migrate && /app/bin/server"]
