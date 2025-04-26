@@ -1,6 +1,7 @@
 # Pomodoro Timer
 
 A web-based Pomodoro Timer application built with Elixir, Phoenix, and LiveView. This application helps you implement the Pomodoro Technique - a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.
+This implementation will keep running, event after you close the tab, without any need for user accounts.
 
 ## Live Demo
 
@@ -33,11 +34,10 @@ The technique follows these steps:
 
 1. **Access the Application**: Open your web browser and navigate to the application URL
 2. **Start a Focus Session**: Click the "Focus" button to start a 25-minute focus session
-3. **Pause if Needed**: Click the button again to pause the timer
-4. **Take a Break**: When the focus session ends, click the "Break" button to start a 5-minute break
-5. **Repeat**: Continue alternating between focus and break sessions
+3. **Take a Break**: When the focus session ends, click the "Break" button to start a 5-minute break
+4. **Repeat**: Continue alternating between focus and break sessions
 
-The application automatically saves your session state, so you can close your browser and return later to continue where you left off.
+The application automatically saves your session state, so you can close your tab and return to where you left off.
 
 ## Development Setup
 
@@ -45,7 +45,6 @@ The application automatically saves your session state, so you can close your br
 
 - Elixir 1.14 or later
 - Erlang/OTP 25 or later
-- Node.js 16 or later
 - SQLite3
 
 ### Installation Steps
