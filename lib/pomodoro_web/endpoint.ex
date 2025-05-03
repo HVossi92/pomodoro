@@ -8,7 +8,9 @@ defmodule PomodoroWeb.Endpoint do
     store: :cookie,
     key: "_pomodoro_key",
     signing_salt: "amJ/v1Di",
-    same_site: "Lax"
+    same_site: "Lax",
+    # 30 days in seconds
+    max_age: 60 * 60 * 24 * 30
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

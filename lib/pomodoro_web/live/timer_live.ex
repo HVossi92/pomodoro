@@ -27,14 +27,6 @@ defmodule PomodoroWeb.TimerLive do
       # Then subscribe to timer updates for this user
       Phoenix.PubSub.subscribe(Pomodoro.PubSub, "timer:#{user_id}")
 
-      # Use hook to manage user_id in localStorage
-      socket =
-        socket
-        |> push_event("init-user-id", %{
-          user_id: user_id,
-          local_storage_key: PomodoroWeb.UserId.local_storage_key()
-        })
-
       # Get persisted timer state
       timer = TimerStore.get_timer(user_id)
 
@@ -66,11 +58,7 @@ defmodule PomodoroWeb.TimerLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class="flex flex-col items-center justify-center min-h-[80vh]"
-      phx-hook="UserIdHook"
-      id="user-id-container"
-    >
+    <div class="flex flex-col items-center justify-center min-h-[80vh]">
       <div
         class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-10 max-w-md w-full text-center"
         phx-hook="TimerTitleHook"
@@ -146,47 +134,6 @@ defmodule PomodoroWeb.TimerLive do
       })
 
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("user_id_from_storage", %{"user_id" => stored_user_id}, socket) do
-    current_user_id = socket.assigns.user_id
-
-    # Handle case where user ID from localStorage differs from session
-    if stored_user_id != current_user_id do
-      # First unsubscribe from current user_id to prevent duplicate messages
-      Phoenix.PubSub.unsubscribe(Pomodoro.PubSub, "timer:#{current_user_id}")
-
-      # Then subscribe to stored user_id
-      Phoenix.PubSub.subscribe(Pomodoro.PubSub, "timer:#{stored_user_id}")
-
-      # Get timer data for the stored user ID
-      timer = TimerStore.get_timer(stored_user_id)
-
-      # Update the user ID in the session for future reconnections
-      socket =
-        socket
-        |> assign(:user_id, stored_user_id)
-        |> assign(:timer_running, timer.running)
-        |> assign(:seconds_left, timer.seconds_left)
-        |> assign(:timer_mode, timer.mode)
-        |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
-
-      {:noreply, socket}
-    else
-      # If user ID is the same, still get fresh timer data
-      # to ensure consistency after reconnections
-      timer = TimerStore.get_timer(current_user_id)
-
-      socket =
-        socket
-        |> assign(:timer_running, timer.running)
-        |> assign(:seconds_left, timer.seconds_left)
-        |> assign(:timer_mode, timer.mode)
-        |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
-
-      {:noreply, socket}
-    end
   end
 
   @impl true
