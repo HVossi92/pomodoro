@@ -65,7 +65,9 @@ if config_env() == :prod do
       "//pomofocus.duckdns.org",
       "//*.pomofocus.duckdns.org",
       "//pomofocus.uk",
-      "//*.pomofocus.uk"
+      "//*.pomofocus.uk",
+      "//pomofocus.vossihub.com",
+      "//*.pomofocus.vossihub.com"
     ]
 
   # ## SSL Support
