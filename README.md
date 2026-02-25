@@ -27,6 +27,9 @@ The technique follows these steps:
 
 - 25-minute focus timer
 - 5-minute break timer
+- Streak counter (consecutive days with at least one completed focus session)
+- Contribution-style heatmap (52 weeks × 7 days) for session history
+- Optional GitHub Gist sync to back up session data (see **Settings**)
 - Simple, clean user interface
 - Real-time timer updates
 - Automatic session tracking with browser cookies
@@ -40,6 +43,8 @@ The technique follows these steps:
 4. **Repeat**: Continue alternating between focus and break sessions
 
 The application automatically saves your session state, so you can close your tab and return to where you left off.
+
+Session stats (streak and heatmap) are stored in your browser (localStorage). Optionally, connect a GitHub Gist in **Settings** to back up and sync session data across devices.
 
 ## Development Setup
 
@@ -77,3 +82,27 @@ The application automatically saves your session state, so you can close your ta
 ```bash
 mix test
 ```
+
+### Mix tasks
+
+- **`mix pomodoro.analytics.query`** — Print usage summary. Use `--sessions 7` or `--users 7` for per-day stats over the last 7 days.
+- **`mix pomodoro.session_stats.seed`** — Generate sample session data (JSON) for the last 90 days (use `--days N` to change). Copy the output and paste into the browser console as `localStorage.setItem('pomodoro_session_stats', '<paste>');` then reload to test the heatmap and streak UI.
+
+### Session stats
+
+Session data lives in localStorage under the key `pomodoro_session_stats`. Structure: `{ sessions: [{ date, count }, ...], github_gist_id? }`. The GitHub token is stored encrypted on the server (BFF); only the Gist ID is kept in the browser. A `pomodoro_sessions` table exists in the database for future use; it is not used by the current app.
+
+## Deployment / Environment variables
+
+For production (e.g. Docker or a release), set these in the environment. **Never commit real values** (this is a public repo). Use `.env` (gitignored) or your platform’s secret store.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SECRET_KEY_BASE` | Yes | Used to sign cookies and encrypt stored Gist tokens. Generate with `mix phx.gen.secret`. |
+| `DATABASE_PATH` | Yes | Path to the SQLite database file (e.g. `/app/data/pomodoro.db`). |
+| `PHX_SERVER` | No | Set to `true` when running the release server. |
+| `PORT` | No | HTTP port (default `4000`). |
+| `PHX_HOST` | No | Host for URL generation (default `example.com`). |
+| `POOL_SIZE` | No | Ecto pool size (default `5`). |
+
+Copy `.env.example` to `.env` and fill in values for local or production use.

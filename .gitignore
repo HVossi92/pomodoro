@@ -42,3 +42,8 @@ npm-debug.log
 # macOS
 .DS_Store
 
+# Environment and secrets (public repo: never commit real values)
+.env
+.env.*
+!.env.example
+*.env

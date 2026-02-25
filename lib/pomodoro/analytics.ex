@@ -88,4 +88,40 @@ defmodule Pomodoro.Analytics do
         }
     end
   end
+
+  @doc """
+  Returns sessions (timer starts) grouped by day for the last `days` days.
+  Returns a list of `{date, count}`.
+  """
+  def sessions_by_day(days \\ 7) do
+    date_cutoff = Date.utc_today() |> Date.add(-days)
+
+    query =
+      from(u in UsageStat,
+        where: u.action == "start" and fragment("date(?)", u.inserted_at) >= ^date_cutoff,
+        group_by: fragment("date(?)", u.inserted_at),
+        select: {fragment("date(?)", u.inserted_at), count(u.id)},
+        order_by: fragment("date(?)", u.inserted_at)
+      )
+
+    Repo.all(query)
+  end
+
+  @doc """
+  Returns active users (distinct anonymous_id) per day for the last `days` days.
+  Returns a list of `{date, count}`.
+  """
+  def active_users_by_day(days \\ 7) do
+    date_cutoff = Date.utc_today() |> Date.add(-days)
+
+    query =
+      from(u in UsageStat,
+        where: fragment("date(?)", u.inserted_at) >= ^date_cutoff,
+        group_by: fragment("date(?)", u.inserted_at),
+        select: {fragment("date(?)", u.inserted_at), count(fragment("DISTINCT ?", u.anonymous_id))},
+        order_by: fragment("date(?)", u.inserted_at)
+      )
+
+    Repo.all(query)
+  end
 end

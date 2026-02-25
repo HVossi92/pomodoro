@@ -171,6 +171,14 @@ defmodule Pomodoro.TimerStore do
             # Log completion of timer if it just reached zero
             if new_seconds == 0 and timer.seconds_left > 0 do
               log_action_safely(user_id, "complete", timer.mode, 0)
+              # Notify LiveView for session stats (focus completions only)
+              if timer.mode == :focus do
+                Phoenix.PubSub.broadcast(
+                  Pomodoro.PubSub,
+                  "timer:#{user_id}",
+                  {:pomodoro_complete, user_id}
+                )
+              end
             end
 
             new_timer

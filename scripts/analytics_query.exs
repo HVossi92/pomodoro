@@ -1,3 +1,4 @@
+# DEPRECATED: Use mix pomodoro.analytics.query instead.
 # Load this file with `iex -S mix run scripts/analytics_query.exs`
 
 # Helper functions to query analytics data

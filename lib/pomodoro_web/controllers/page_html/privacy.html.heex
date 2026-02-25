@@ -54,6 +54,27 @@
     <p class="mb-2">
       This information helps us ensure the security and functionality of our application.
     </p>
+
+    <h3 class="text-lg font-medium mb-2">2.5 Session Statistics (Heatmap and Streaks)</h3>
+    <p class="mb-2">
+      Session statistics (date and count of completed focus sessions per day) are stored in <strong>localStorage</strong> in your browser.
+      This data is used to display the heatmap and streak features.
+      When you load the timer page, this data is sent to our server to compute streak and heatmap values; it is <strong>not</strong> stored on our servers.
+    </p>
+
+    <h3 class="text-lg font-medium mb-2">2.6 Optional GitHub Gist Backup</h3>
+    <p class="mb-2">
+      If you use the optional GitHub Gist backup in Settings:
+    </p>
+    <ul class="list-disc pl-6 mb-2">
+      <li>Your GitHub personal access token is <strong>encrypted and stored on our servers</strong> (not in your browser). We use it only to create, read, and update your private Gist on your behalf.</li>
+      <li>The Gist identifier is stored in your browser's local storage so the app can offer sync and backup.</li>
+      <li>Session statistics are sent from our server to GitHub's API when you sync; we do not use your token for any other purpose.</li>
+      <li>We retain your stored token until you click <strong>Disconnect</strong> in Settings. Deletion is user-initiated only.</li>
+    </ul>
+    <p class="mb-2">
+      Legal basis: Art. 6(1)(b) GDPR (performance of the backup service). You have the right to erasure at any time by disconnecting in Settings. GitHub's privacy policy applies to data stored in Gists.
+    </p>
   </section>
 
   <section class="mb-8">
@@ -72,9 +93,9 @@
   </section>
 
   <section class="mb-8">
-    <h2 class="text-xl font-semibold mb-3">4. Cookies</h2>
+    <h2 class="text-xl font-semibold mb-3">4. Cookies and Local Storage</h2>
     <p class="mb-2">
-      We use essential cookies to enable the core functionality of our application:
+      We use essential cookies and browser local storage to enable the core functionality of our application:
     </p>
     <ul class="list-disc pl-6 mb-2">
       <li>
@@ -83,9 +104,12 @@
       <li>
         <strong>CSRF token cookie</strong>: Protects against cross-site request forgery attacks
       </li>
+      <li>
+        <strong>Local storage</strong>: Stores session statistics (heatmap and streak data) and, if you use the optional GitHub Gist backup, the Gist identifier only. Your GitHub token is stored encrypted on our servers, not in your browser.
+      </li>
     </ul>
     <p class="mb-2">
-      These cookies are necessary for the application to function properly and do not require explicit consent under German law when used solely for this purpose.
+      These cookies and local storage are necessary for the application to function properly and do not require explicit consent under German law when used solely for this purpose.
     </p>
   </section>
 
@@ -101,6 +125,9 @@
       </li>
     </ul>
     <p class="mb-2">
+      Session statistics in local storage persist until you clear site data. If you use the GitHub Gist backup, your encrypted token is stored on our servers until you click <strong>Disconnect</strong> in Settings; we do not delete it automatically.
+    </p>
+    <p class="mb-2">
       Timer state data stored on our servers is only kept in volatile memory and is deleted when the server restarts or when you close your session.
     </p>
     <p class="mb-2">
@@ -111,7 +138,10 @@
   <section class="mb-8">
     <h2 class="text-xl font-semibold mb-3">6. Data Sharing</h2>
     <p class="mb-2">
-      We do not share your data with third parties. Your timer data, session information, and anonymous usage statistics remain exclusively on our servers and in your browser's cookies.
+      We do not share your data with third parties. Your timer data, session information, and anonymous usage statistics remain exclusively on our servers and in your browser's cookies and local storage.
+    </p>
+    <p class="mb-2">
+      If you use the optional GitHub Gist backup, our server sends your session statistics to GitHub's API on your behalf; we do not share this data with any other third party.
     </p>
   </section>
 
@@ -119,6 +149,9 @@
     <h2 class="text-xl font-semibold mb-3">7. Analytics and Third-Party Services</h2>
     <p class="mb-2">
       This application uses only internal, anonymized analytics to monitor server performance and usage patterns. We do not use any third-party analytics services, tracking tools, or advertising networks.
+    </p>
+    <p class="mb-2">
+      The optional GitHub Gist backup uses GitHub's API. When you enable it, our server sends your session statistics to GitHub in accordance with GitHub's privacy policy.
     </p>
   </section>
 
@@ -128,7 +161,7 @@
       We may update this privacy policy from time to time to reflect changes to our practices or for other operational, legal, or regulatory reasons. The current version will always be available on this page.
     </p>
     <p class="mb-2">
-      Last updated: 2025-04-26
+      Last updated: 2026-02-25
     </p>
   </section>
 </div>

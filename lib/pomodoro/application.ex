@@ -14,11 +14,8 @@ defmodule Pomodoro.Application do
        repos: Application.fetch_env!(:pomodoro, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:pomodoro, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Pomodoro.PubSub},
-      # Start the Finch HTTP client for sending emails
       {Finch, name: Pomodoro.Finch},
-      # Start a worker by calling: Pomodoro.Worker.start_link(arg)
-      # {Pomodoro.Worker, arg},
-      # Start to serve requests, typically the last entry
+      PomodoroWeb.RateLimit,
       PomodoroWeb.Endpoint,
       # Start the TimerStore with configurable session timeout (default is 30 minutes)
       {Pomodoro.TimerStore, [session_timeout: timer_session_timeout()]}

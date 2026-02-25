@@ -19,6 +19,7 @@ defmodule PomodoroWeb.Router do
     pipe_through :browser
 
     live "/", TimerLive
+    live "/settings", SettingsLive
     # get "/", PageController, :home
     get "/privacy", PageController, :privacy
   end
