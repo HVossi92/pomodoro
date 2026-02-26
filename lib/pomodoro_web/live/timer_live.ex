@@ -114,7 +114,25 @@ defmodule PomodoroWeb.TimerLive do
         </div>
       </div>
 
-      <div id="session-stats-panel" phx-hook="SessionStatsHook" phx-update="ignore" class="mt-8 w-full max-w-4xl">
+      <div
+        id="session-stats-panel"
+        phx-hook="SessionStatsHook"
+        phx-update="ignore"
+        class="mt-8 w-full max-w-4xl min-h-[260px]"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Session stats
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Loading your recent focus sessions...
+          </p>
+          <div class="mt-4 space-y-2 animate-pulse">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+            <div class="h-32 bg-gray-100 dark:bg-gray-900 rounded"></div>
+          </div>
+        </div>
       </div>
     </div>
     """

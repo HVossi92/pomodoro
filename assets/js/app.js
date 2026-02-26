@@ -158,7 +158,7 @@ Hooks.SessionStatsHook = {
           ${heatmapHtml}
         </div>
         <div id="heatmap-tooltip" class="heatmap-tooltip hidden fixed z-[100] px-2 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg pointer-events-none whitespace-nowrap" role="tooltip"></div>
-        <a href="/settings" class="mt-4 inline-block text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline" aria-label="Settings">Settings</a>
+        <a href="/settings" class="mt-4 inline-block text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline" aria-label="Settings">Sync your progress</a>
       </div>
     `;
     this.attachHeatmapTooltip(el);
