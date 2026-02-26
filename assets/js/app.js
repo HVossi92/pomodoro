@@ -21,7 +21,17 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import { getSessionStatsData, saveSessionStatsData } from "./session_stats_storage.js"
+import { getSessionStatsData, saveSessionStatsData, clearSessionStatsData } from "./session_stats_storage.js"
+
+// Expose for inline handlers (e.g. Settings "Delete my data" button)
+window.clearPomodoroLocalStorage = () => clearSessionStatsData();
+
+// After "Delete my data" we redirect to /?deleted=1; clear any cached session stats
+// (e.g. bfcache or another tab) so the page does not repopulate from cache.
+if (typeof window !== "undefined" && window.location.search.includes("deleted=1")) {
+  clearSessionStatsData();
+  window.history.replaceState({}, "", window.location.pathname);
+}
 
 // Dark mode setup
 const setupDarkMode = () => {

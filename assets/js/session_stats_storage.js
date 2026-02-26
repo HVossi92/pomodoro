@@ -31,6 +31,13 @@ export function saveSessionStatsData(data) {
 }
 
 /**
+ * Removes the session stats cache from localStorage (e.g. when user deletes their data).
+ */
+export function clearSessionStatsData() {
+  localStorage.removeItem(SESSION_STATS_KEY);
+}
+
+/**
  * Returns local date as YYYY-MM-DD (browser timezone).
  */
 export function localDateString(date = new Date()) {

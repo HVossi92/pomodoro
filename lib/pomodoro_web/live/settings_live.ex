@@ -103,7 +103,7 @@ defmodule PomodoroWeb.SettingsLive do
           <input type="hidden" name="_csrf_token" id="delete-my-data-csrf" value="" />
           <button
             type="button"
-            onclick="if (confirm('Permanently delete all your data and start with a new session? This cannot be undone.')) { document.getElementById('delete-my-data-csrf').value = document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content') || ''; document.getElementById('delete-my-data-form').submit(); }"
+            onclick="if (confirm('Permanently delete all your data and start with a new session? This cannot be undone.')) { window.clearPomodoroLocalStorage && window.clearPomodoroLocalStorage(); document.getElementById('delete-my-data-csrf').value = document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content') || ''; document.getElementById('delete-my-data-form').submit(); }"
             class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
           >
             Delete my data

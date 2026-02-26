@@ -181,7 +181,9 @@ defmodule PomodoroWeb.TimerLive do
 
     case RateLimit.hit(key, @session_stats_scale_ms, @session_stats_limit) do
       {:allow, _} ->
-        client_sessions = SessionStats.sanitize_sessions(params["sessions"] || [], @max_sessions_length)
+        client_sessions =
+          SessionStats.sanitize_sessions(params["sessions"] || [], @max_sessions_length)
+
         sessions = Sessions.merge_from_client(user_id, client_sessions)
         today = Date.utc_today()
         streak = SessionStats.calculate_streak(sessions, today)

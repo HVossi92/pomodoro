@@ -16,7 +16,8 @@ defmodule PomodoroWeb.SettingsControllerTest do
 
     conn = post(conn, ~p"/settings/delete_my_data")
 
-    assert redirected_to(conn) == ~p"/"
+    assert redirected_to(conn) =~ ~p"/"
+    assert redirected_to(conn) =~ "deleted=1"
     assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "deleted"
     assert Sessions.list_sessions(user_id) == []
     assert Accounts.list_identities(user_id) == []
