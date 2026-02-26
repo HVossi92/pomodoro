@@ -20,8 +20,9 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} as builder
 
-# install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
+# install build dependencies (curl needed to pre-download Tailwind - avoids flaky
+# downloads from GitHub releases when the Elixir tailwind package fetches via its HTTP client)
+RUN apt-get update -y && apt-get install -y build-essential git curl \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -50,6 +51,14 @@ COPY priv priv
 COPY lib lib
 
 COPY assets assets
+
+# Pre-download Tailwind binary so mix assets.deploy doesn't fetch it. The Elixir
+# tailwind package's HTTP client can fail in GitHub Actions (socket_closed_remotely,
+# rate limits). curl is more reliable there. Version must match config/config.exs.
+RUN mkdir -p _build && \
+    curl -L --retry 3 --retry-delay 2 -o _build/tailwind-linux-x64 \
+        https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.3/tailwindcss-linux-x64 && \
+    chmod +x _build/tailwind-linux-x64
 
 # compile assets
 RUN mix assets.deploy
