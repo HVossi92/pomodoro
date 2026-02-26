@@ -59,7 +59,10 @@ defmodule Pomodoro.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:hammer, "~> 7.0"}
+      {:hammer, "~> 7.0"},
+      {:ueberauth, "~> 0.10"},
+      {:ueberauth_google, "~> 0.10"},
+      {:ueberauth_github, "~> 0.8"}
     ]
   end
 

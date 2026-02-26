@@ -1,7 +1,7 @@
 defmodule Pomodoro.SessionStats do
   @moduledoc """
   Pure functions for session statistics: streak calculation, session merging,
-  and heatmap data. Used by the session stats UI (streak, heatmap) and Gist sync.
+  and heatmap data. Used by the session stats UI (streak, heatmap).
   """
 
   @doc """

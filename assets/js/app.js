@@ -21,7 +21,7 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import { getSessionStatsData, saveSessionStatsData, addSession, localDateString } from "./session_stats_storage.js"
+import { getSessionStatsData, saveSessionStatsData } from "./session_stats_storage.js"
 
 // Dark mode setup
 const setupDarkMode = () => {
@@ -68,6 +68,38 @@ window.POMODORO_USER_ID_KEY = "pomodoro_user_id";
 // Define Hooks for LiveView
 const Hooks = {}
 
+// Hook for buttons/links that require confirmation before firing phx-click.
+// Use with phx-hook="Confirm" data-confirm="Your message" data-phx-event="event_name" phx-value-*="..."
+Hooks.Confirm = {
+  mounted() {
+    this.el.addEventListener("click", (e) => {
+      const msg = this.el.getAttribute("data-confirm");
+      if (msg && !confirm(msg)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      const event = this.el.getAttribute("data-phx-event");
+      if (!event) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const params = {};
+      for (const attr of this.el.attributes) {
+        if (attr.name.startsWith("phx-value-") && attr.name !== "phx-value-static") {
+          const key = attr.name.replace("phx-value-", "").replace(/-/g, "_");
+          const keys = key.split("_");
+          if (keys.length === 1) {
+            params[key] = attr.value;
+          } else {
+            params[keys[0]] = attr.value;
+          }
+        }
+      }
+      this.pushEvent(event, params);
+    });
+  }
+};
+
 // Hook to update page title based on timer state
 Hooks.TimerTitleHook = {
   mounted() {
@@ -77,53 +109,26 @@ Hooks.TimerTitleHook = {
   }
 }
 
-// Session stats: streak, heatmap, localStorage; receives pomodoro-complete from LiveView
-// Gist sync goes through server (BFF): pushEvent gist_fetch / gist_update
+// Session stats: streak, heatmap; DB-backed, optional localStorage cache
 Hooks.SessionStatsHook = {
   mounted() {
-    this.renderPanel(getSessionStatsData());
+    this.renderPanel({ sessions: [], streak: 0, heatmap: {} });
     const data = getSessionStatsData();
-    if (data.github_gist_id) {
-      this.pushEvent("gist_fetch", {});
-    } else {
-      this.requestSessionStatsUpdate(data.sessions);
-    }
+    this.pushEvent("session_stats_update", { sessions: data.sessions || [] });
+
+    this.handleEvent("session-stats-init", ({ sessions, streak, heatmap }) => {
+      saveSessionStatsData({ sessions: sessions || [] });
+      this.renderPanel({ sessions: sessions || [], streak: streak ?? 0, heatmap: heatmap || {} });
+    });
 
     this.handleEvent("pomodoro-complete", () => {
-      const updated = addSession(localDateString());
-      this.requestSessionStatsUpdate(updated.sessions);
-      if (updated.github_gist_id) {
-        this.pushEvent("gist_update", { gist_id: updated.github_gist_id, data: updated });
-      }
+      // Server increments DB and pushes session-stats-update; no local action needed
     });
 
-    this.handleEvent("session-stats-update", ({ streak, heatmap }) => {
-      const data = getSessionStatsData();
-      this.renderPanel({ ...data, streak, heatmap });
+    this.handleEvent("session-stats-update", ({ sessions, streak, heatmap }) => {
+      saveSessionStatsData({ sessions: sessions || [] });
+      this.renderPanel({ sessions: sessions || [], streak: streak ?? 0, heatmap: heatmap || {} });
     });
-
-    this.handleEvent("session-stats-merge-result", ({ sessions }) => {
-      const data = getSessionStatsData();
-      saveSessionStatsData({ ...data, sessions });
-      this.requestSessionStatsUpdate(sessions);
-    });
-
-    this.handleEvent("gist_fetch_result", (result) => {
-      if (result.ok && result.data && Array.isArray(result.data.sessions)) {
-        const data = getSessionStatsData();
-        this.pushEvent("session_stats_merge", { local: data.sessions || [], remote: result.data.sessions });
-      } else {
-        this.requestSessionStatsUpdate(getSessionStatsData().sessions);
-      }
-    });
-
-    this.handleEvent("gist_update_result", () => {
-      // Optional: show brief success feedback; server updated Gist
-    });
-  },
-
-  requestSessionStatsUpdate(sessions) {
-    this.pushEvent("session_stats_update", { sessions: sessions || [] });
   },
 
   renderPanel(data) {
@@ -153,7 +158,7 @@ Hooks.SessionStatsHook = {
           ${heatmapHtml}
         </div>
         <div id="heatmap-tooltip" class="heatmap-tooltip hidden fixed z-[100] px-2 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg pointer-events-none whitespace-nowrap" role="tooltip"></div>
-        <a href="/settings" class="mt-4 inline-block text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline" aria-label="Sync your stats">Sync your stats</a>
+        <a href="/settings" class="mt-4 inline-block text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline" aria-label="Settings">Settings</a>
       </div>
     `;
     this.attachHeatmapTooltip(el);
@@ -274,127 +279,6 @@ Hooks.SessionStatsHook = {
     ).join("");
 
     return `<svg width="100%" height="auto" viewBox="0 0 ${totalWidth} ${totalHeight}" preserveAspectRatio="xMidYMid meet" class="heatmap-grid block cursor-pointer" role="img" aria-label="Session heatmap">${monthTexts}${cells.join("")}</svg>`;
-  }
-}
-
-Hooks.GistSettingsHook = {
-  mounted() {
-    this.updateStatus();
-    const connectBtn = document.getElementById("gist-connect-btn");
-    const disconnectBtn = document.getElementById("gist-disconnect-btn");
-    const statusEl = document.getElementById("gist-status");
-    if (connectBtn) connectBtn.addEventListener("click", () => this.connect(statusEl));
-    if (disconnectBtn) disconnectBtn.addEventListener("click", () => this.disconnect(statusEl));
-
-    this.handleEvent("gist_connect_result", (result) => {
-      if (result.ok) {
-        if (result.need_data) {
-          if (statusEl) statusEl.textContent = "Creating gist…";
-          const data = getSessionStatsData();
-          this.pushEvent("gist_connect_with_data", { data });
-        } else if (result.gist_id) {
-          const data = getSessionStatsData();
-          saveSessionStatsData({ ...data, github_gist_id: result.gist_id });
-          const input = document.getElementById("github-token-input");
-          if (input) input.value = "";
-          if (statusEl) {
-            statusEl.textContent = "Connected";
-            statusEl.classList.remove("text-red-600", "dark:text-red-400");
-          }
-        }
-      } else {
-        if (statusEl) {
-          statusEl.textContent = `Error: ${result.error || "Unknown"}`;
-          statusEl.classList.add("text-red-600", "dark:text-red-400");
-        }
-      }
-    });
-
-    this.handleEvent("gist_disconnect_result", (result) => {
-      if (result.ok) {
-        const data = getSessionStatsData();
-        saveSessionStatsData({ ...data, github_gist_id: null });
-        if (statusEl) statusEl.textContent = "Not connected";
-      }
-    });
-  },
-
-  updated() {
-    this.updateStatus();
-  },
-
-  updateStatus() {
-    const statusEl = document.getElementById("gist-status");
-    if (!statusEl) return;
-<<<<<<< HEAD
-    const el = document.getElementById("gist-settings");
-    const connected = el && el.getAttribute("data-gist-connected") === "true";
-    statusEl.textContent = connected ? "Connected" : "Not connected";
-    if (connected) statusEl.classList.remove("text-red-600", "dark:text-red-400");
-=======
-    const data = getSessionStatsData();
-    statusEl.textContent = data.github_gist_id ? "Connected" : "Not connected";
-    if (data.github_gist_id) statusEl.classList.remove("text-red-600", "dark:text-red-400");
->>>>>>> bf4b00b (wip)
-  },
-
-  connect(statusEl) {
-    const input = document.getElementById("github-token-input");
-    const token = input && input.value ? input.value.trim() : "";
-    if (!token) {
-      if (statusEl) statusEl.textContent = "Enter a token first.";
-      return;
-    }
-<<<<<<< HEAD
-    if (statusEl) statusEl.textContent = "Connecting…";
-    this.pushEvent("gist_connect", { token });
-  },
-
-  disconnect(statusEl) {
-    if (statusEl) statusEl.textContent = "Disconnecting…";
-    this.pushEvent("gist_disconnect", {});
-=======
-    const data = getSessionStatsData();
-
-    if (data.github_gist_id) {
-      // Reconnect: token update only, do not create a new gist
-      if (statusEl) statusEl.textContent = "Connecting…";
-      saveSessionStatsData({
-        ...data,
-        github_token: token,
-        github_gist_id: data.github_gist_id
-      });
-      if (statusEl) {
-        statusEl.textContent = "Connected";
-        statusEl.classList.remove("text-red-600", "dark:text-red-400");
-      }
-      if (input) input.value = "";
-      return;
-    }
-
-    if (statusEl) statusEl.textContent = "Creating gist…";
-    try {
-      const gistId = await createGist(token, data);
-      if (!gistId) {
-        throw new Error("missing gist id");
-      }
-      saveSessionStatsData({
-        ...data,
-        github_token: token,
-        github_gist_id: gistId
-      });
-      if (statusEl) {
-        statusEl.textContent = "Connected";
-        statusEl.classList.remove("text-red-600", "dark:text-red-400");
-      }
-      if (input) input.value = "";
-    } catch (e) {
-      if (statusEl) {
-        statusEl.textContent = `Error: ${e.message}`;
-        statusEl.classList.add("text-red-600", "dark:text-red-400");
-      }
-    }
->>>>>>> bf4b00b (wip)
   }
 }
 

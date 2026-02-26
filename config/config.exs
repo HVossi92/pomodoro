@@ -61,6 +61,13 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Ueberauth providers (credentials from env in dev/test, runtime.exs in prod)
+config :ueberauth, Ueberauth,
+  providers: [
+    google: {Ueberauth.Strategy.Google, []},
+    github: {Ueberauth.Strategy.Github, [default_scope: "user:email"]}
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

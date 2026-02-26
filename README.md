@@ -29,7 +29,7 @@ The technique follows these steps:
 - 5-minute break timer
 - Streak counter (consecutive days with at least one completed focus session)
 - Contribution-style heatmap (52 weeks × 7 days) for session history
-- Optional GitHub Gist sync to back up session data (see **Settings**)
+- Session stats stored in the database; optional Google/GitHub sign-in for cross-device sync (see **Settings**)
 - Simple, clean user interface
 - Real-time timer updates
 - Automatic session tracking with browser cookies
@@ -44,7 +44,7 @@ The technique follows these steps:
 
 The application automatically saves your session state, so you can close your tab and return to where you left off.
 
-Session stats (streak and heatmap) are stored in your browser (localStorage). Optionally, connect a GitHub Gist in **Settings** to back up and sync session data across devices.
+Session stats (streak and heatmap) are stored in the database. Optionally, sign in with Google or GitHub in **Settings** to link your account for cross-device sync.
 
 ## Development Setup
 
@@ -90,7 +90,7 @@ mix test
 
 ### Session stats
 
-Session data lives in localStorage under the key `pomodoro_session_stats`. Structure: `{ sessions: [{ date, count }, ...], github_gist_id? }`. The GitHub token is stored encrypted on the server (BFF); only the Gist ID is kept in the browser. A `pomodoro_sessions` table exists in the database for future use; it is not used by the current app.
+Session stats (date and count per day) are stored in the `pomodoro_sessions` table. The client may cache them in localStorage under `pomodoro_session_stats` for quick display. Sign in with Google or GitHub in Settings to link your account for optional cross-device sync.
 
 ## Deployment / Environment variables
 
@@ -98,7 +98,11 @@ For production (e.g. Docker or a release), set these in the environment. **Never
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `SECRET_KEY_BASE` | Yes | Used to sign cookies and encrypt stored Gist tokens. Generate with `mix phx.gen.secret`. |
+| `SECRET_KEY_BASE` | Yes | Used to sign cookies. Generate with `mix phx.gen.secret`. |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID (for sign-in). |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret. |
+| `GITHUB_CLIENT_ID` | No | GitHub OAuth client ID (for sign-in). |
+| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth client secret. |
 | `DATABASE_PATH` | Yes | Path to the SQLite database file (e.g. `/app/data/pomodoro.db`). |
 | `PHX_SERVER` | No | Set to `true` when running the release server. |
 | `PORT` | No | HTTP port (default `4000`). |

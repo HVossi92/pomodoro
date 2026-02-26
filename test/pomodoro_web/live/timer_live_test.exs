@@ -26,14 +26,6 @@ defmodule PomodoroWeb.TimerLiveTest do
       "sessions" => [%{"date" => nil, "count" => "x"}, %{"date" => "2026-02-25", "count" => 1}]
     })
 
-    assert_push_event(view, "session-stats-update", %{streak: _, heatmap: _})
-  end
-
-  test "gist_fetch with no credentials pushes ok: false", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/")
-
-    render_hook(view, "gist_fetch", %{})
-
-    assert_push_event(view, "gist_fetch_result", %{ok: false})
+    assert_push_event(view, "session-stats-update", %{sessions: _, streak: _, heatmap: _})
   end
 end

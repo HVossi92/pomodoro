@@ -2,8 +2,7 @@ defmodule PomodoroWeb.TimerLive do
   use PomodoroWeb, :live_view
   alias Pomodoro.TimerStore
   alias Pomodoro.SessionStats
-  alias Pomodoro.GistCredentials
-  alias Pomodoro.GithubGist
+  alias Pomodoro.Sessions
   alias PomodoroWeb.RateLimit
 
   # 25 minutes in seconds
@@ -37,14 +36,25 @@ defmodule PomodoroWeb.TimerLive do
       # Get persisted timer state
       timer = TimerStore.get_timer(user_id)
 
-      # Update with current timer state
-      {:ok,
-       assign(socket,
-         timer_running: timer.running,
-         seconds_left: timer.seconds_left,
-         timer_mode: timer.mode,
-         page_title: "Pomo Focus - #{format_time(timer.seconds_left)}"
-       )}
+      # Fetch persisted sessions from DB and push to client
+      sessions = Sessions.list_sessions(user_id)
+      today = Date.utc_today()
+      streak = SessionStats.calculate_streak(sessions, today)
+      heatmap = SessionStats.heatmap_data(sessions, today)
+
+      socket =
+        socket
+        |> assign(:timer_running, timer.running)
+        |> assign(:seconds_left, timer.seconds_left)
+        |> assign(:timer_mode, timer.mode)
+        |> assign(:page_title, "Pomo Focus - #{format_time(timer.seconds_left)}")
+        |> push_event("session-stats-init", %{
+          sessions: sessions,
+          streak: streak,
+          heatmap: heatmap
+        })
+
+      {:ok, socket}
     else
       # Return with temporary state until connected
       {:ok, socket}
@@ -153,13 +163,15 @@ defmodule PomodoroWeb.TimerLive do
 
     case RateLimit.hit(key, @session_stats_scale_ms, @session_stats_limit) do
       {:allow, _} ->
-        sessions = SessionStats.sanitize_sessions(params["sessions"] || [], @max_sessions_length)
+        client_sessions = SessionStats.sanitize_sessions(params["sessions"] || [], @max_sessions_length)
+        sessions = Sessions.merge_from_client(user_id, client_sessions)
         today = Date.utc_today()
         streak = SessionStats.calculate_streak(sessions, today)
         heatmap = SessionStats.heatmap_data(sessions, today)
 
         {:noreply,
          push_event(socket, "session-stats-update", %{
+           sessions: sessions,
            streak: streak,
            heatmap: heatmap
          })}
@@ -168,62 +180,6 @@ defmodule PomodoroWeb.TimerLive do
         {:noreply, socket}
     end
   end
-
-  @impl true
-  def handle_event("session_stats_merge", params, socket) do
-    user_id = socket.assigns.user_id
-    key = "session_stats:#{user_id}"
-
-    case RateLimit.hit(key, @session_stats_scale_ms, @session_stats_limit) do
-      {:allow, _} ->
-        local = SessionStats.sanitize_sessions(params["local"] || [], @max_sessions_length)
-        remote = SessionStats.sanitize_sessions(params["remote"] || [], @max_sessions_length)
-        merged = SessionStats.merge_sessions(local, remote)
-        {:noreply, push_event(socket, "session-stats-merge-result", %{"sessions" => merged})}
-
-      {:deny, _} ->
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event("gist_fetch", _, socket) do
-    user_id = socket.assigns.user_id
-    creds = GistCredentials.get_credentials(user_id)
-
-    result =
-      if is_nil(creds) or is_nil(creds.gist_id) do
-        %{ok: false, error: "not connected"}
-      else
-        case GithubGist.fetch(creds.token, creds.gist_id) do
-          {:ok, data} -> %{ok: true, data: data}
-          {:error, msg} -> %{ok: false, error: msg}
-        end
-      end
-
-    {:noreply, push_event(socket, "gist_fetch_result", result)}
-  end
-
-  @impl true
-  def handle_event("gist_update", %{"gist_id" => gist_id, "data" => data}, socket)
-      when is_binary(gist_id) and is_map(data) do
-    user_id = socket.assigns.user_id
-    creds = GistCredentials.get_credentials(user_id)
-
-    result =
-      if is_nil(creds) do
-        %{ok: false, error: "not connected"}
-      else
-        case GithubGist.update(creds.token, gist_id, data) do
-          :ok -> %{ok: true}
-          {:error, msg} -> %{ok: false, error: msg}
-        end
-      end
-
-    {:noreply, push_event(socket, "gist_update_result", result)}
-  end
-
-  def handle_event("gist_update", _, socket), do: {:noreply, socket}
 
   @impl true
   def handle_info({:timer_update, timer}, socket) do
@@ -242,8 +198,23 @@ defmodule PomodoroWeb.TimerLive do
   end
 
   @impl true
-  def handle_info({:pomodoro_complete, _user_id}, socket) do
-    {:noreply, push_event(socket, "pomodoro-complete", %{})}
+  def handle_info({:pomodoro_complete, user_id}, socket) do
+    today = Date.utc_today()
+    Sessions.increment_session(user_id, today)
+    sessions = Sessions.list_sessions(user_id)
+    streak = SessionStats.calculate_streak(sessions, today)
+    heatmap = SessionStats.heatmap_data(sessions, today)
+
+    socket =
+      socket
+      |> push_event("pomodoro-complete", %{})
+      |> push_event("session-stats-update", %{
+        sessions: sessions,
+        streak: streak,
+        heatmap: heatmap
+      })
+
+    {:noreply, socket}
   end
 
   defp format_time(seconds) do

@@ -1,15 +1,13 @@
 /**
- * Session stats localStorage helpers.
+ * Session stats localStorage helpers (cache only; DB is source of truth).
  * Key: pomodoro_session_stats
- * Shape: { sessions: [{ date: "YYYY-MM-DD", count: n }, ...], github_gist_id? }
- * Token is stored on the server (BFF); only gist_id is kept here for UI state.
+ * Shape: { sessions: [{ date: "YYYY-MM-DD", count: n }, ...] }
  */
 
 const SESSION_STATS_KEY = "pomodoro_session_stats";
 
 const defaultData = () => ({
-  sessions: [],
-  github_gist_id: null
+  sessions: []
 });
 
 export function getSessionStatsData() {
@@ -18,8 +16,7 @@ export function getSessionStatsData() {
     if (!raw) return defaultData();
     const data = JSON.parse(raw);
     return {
-      sessions: Array.isArray(data.sessions) ? data.sessions : [],
-      github_gist_id: data.github_gist_id ?? null
+      sessions: Array.isArray(data.sessions) ? data.sessions : []
     };
   } catch (_e) {
     return defaultData();
@@ -28,8 +25,7 @@ export function getSessionStatsData() {
 
 export function saveSessionStatsData(data) {
   const payload = {
-    sessions: data.sessions ?? [],
-    github_gist_id: data.github_gist_id ?? null
+    sessions: data.sessions ?? []
   };
   localStorage.setItem(SESSION_STATS_KEY, JSON.stringify(payload));
 }

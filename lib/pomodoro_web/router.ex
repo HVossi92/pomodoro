@@ -20,8 +20,17 @@ defmodule PomodoroWeb.Router do
 
     live "/", TimerLive
     live "/settings", SettingsLive
-    # get "/", PageController, :home
+    post "/settings/delete_my_data", SettingsController, :delete_my_data
     get "/privacy", PageController, :privacy
+    get "/terms", PageController, :terms
+  end
+
+  scope "/auth", PomodoroWeb do
+    pipe_through :browser
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
+    delete "/logout", AuthController, :delete
   end
 
   # Other scopes may use custom stacks.

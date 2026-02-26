@@ -36,10 +36,7 @@ defmodule Mix.Tasks.Pomodoro.SessionStats.Seed do
       |> Enum.filter(fn %{"count" => c} -> c > 0 end)
       |> Enum.sort_by(& &1["date"], :desc)
 
-    data = %{
-      "sessions" => sessions,
-      "github_gist_id" => nil
-    }
+    data = %{"sessions" => sessions}
 
     json = Jason.encode!(data, pretty: true)
     Mix.shell().info(json)
