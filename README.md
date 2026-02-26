@@ -5,11 +5,9 @@ This implementation will keep running, event after you close the tab, without an
 
 ## Live Demo
 
-Try out the Pomodoro Timer in action: [**Live Demo**](https://pomofocus.uk/)
+Try out the Pomodoro Timer in action: [**Live Demo**](https://pomofocus.vossihub.com/)
 
-[![Pomodoro Timer Screenshot](/priv/static/images/pomodoro_screenshot.png)](https://pomofocus.uk/)
-
-Backup link: https://pomofocus.duckdns.org
+[![Pomodoro Timer Screenshot](priv/static/images/pomodoro_screenshot-1.png)](https://pomofocus.vossihub.com/)
 
 ## About the Pomodoro Technique
 
@@ -96,17 +94,17 @@ Session stats (date and count per day) are stored in the `pomodoro_sessions` tab
 
 For production (e.g. Docker or a release), set these in the environment. **Never commit real values** (this is a public repo). Use `.env` (gitignored) or your platform’s secret store.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SECRET_KEY_BASE` | Yes | Used to sign cookies. Generate with `mix phx.gen.secret`. |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID (for sign-in). |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret. |
-| `GITHUB_CLIENT_ID` | No | GitHub OAuth client ID (for sign-in). |
-| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth client secret. |
-| `DATABASE_PATH` | Yes | Path to the SQLite database file (e.g. `/app/data/pomodoro.db`). |
-| `PHX_SERVER` | No | Set to `true` when running the release server. |
-| `PORT` | No | HTTP port (default `4000`). |
-| `PHX_HOST` | No | Host for URL generation (default `example.com`). |
-| `POOL_SIZE` | No | Ecto pool size (default `5`). |
+| Variable               | Required | Description                                                      |
+| ---------------------- | -------- | ---------------------------------------------------------------- |
+| `SECRET_KEY_BASE`      | Yes      | Used to sign cookies. Generate with `mix phx.gen.secret`.        |
+| `GOOGLE_CLIENT_ID`     | No       | Google OAuth client ID (for sign-in).                            |
+| `GOOGLE_CLIENT_SECRET` | No       | Google OAuth client secret.                                      |
+| `GITHUB_CLIENT_ID`     | No       | GitHub OAuth client ID (for sign-in).                            |
+| `GITHUB_CLIENT_SECRET` | No       | GitHub OAuth client secret.                                      |
+| `DATABASE_PATH`        | Yes      | Path to the SQLite database file (e.g. `/app/data/pomodoro.db`). |
+| `PHX_SERVER`           | No       | Set to `true` when running the release server.                   |
+| `PORT`                 | No       | HTTP port (default `4000`).                                      |
+| `PHX_HOST`             | No       | Host for URL generation (default `example.com`).                 |
+| `POOL_SIZE`            | No       | Ecto pool size (default `5`).                                    |
 
 Copy `.env.example` to `.env` and fill in values for local or production use.
